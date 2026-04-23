@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NFTDimochka | Хомяки 3x3 с анимацией</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        /* КРАСИВЫЙ ЧЁРНЫЙ ФОН С АНИМАЦИЕЙ */
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #0a0f1a 0%, #03060c 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            color: #fff;
+            padding: 18px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0)), radial-gradient(3px 3px at 75% 45%, #ffdd99, rgba(0,0,0,0)), radial-gradient(1px 1px at 35% 80%, #ffffff, rgba(0,0,0,0)), radial-gradient(4px 4px at 95% 15%, #ffcc88, rgba(0,0,0,0)), radial-gradient(2px 2px at 55% 92%, #bbffdd, rgba(0,0,0,0));
+            background-repeat: no-repeat;
+            background-size: 450px 450px, 300px 300px, 550px 550px, 400px 400px, 500px 500px;
+            animation: starsShift 50s linear infinite;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes starsShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-80px, -60px) rotate(2deg); }
+        }
+
+        .ambient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 230, 120, 0.08), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 10px 28px;
+            border: 1px solid #2eff9e;
+            box-shadow: 0 0 12px #2eff9e66;
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #FFD966, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .green-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2eff9e;
+            text-shadow: 0 0 6px #00ffaa;
+        }
+
+        .coin-panel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #000000aa;
+            padding: 5px 20px;
+            border-radius: 50px;
+            border: 1px solid gold;
+        }
+
+        .coin-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: gold;
+        }
+
+        .user-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #1f2a3e;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #e6b422, #ffcc44);
+            color: #1e1a0c;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(8, 12, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 38px;
+            padding: 20px;
+            border: 1px solid rgba(46, 255, 158, 0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            border-left: 5px solid #2eff9e;
+            padding-left: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* СЕТКА ХОМЯКОВ 3×3 как на том сайте */
+        .clicker-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        /* КАРТОЧКА ХОМЯКА С АНИМАЦИЕЙ */
+        .clicker-btn {
+            background: #1e2a3a;
+            font-size: 64px;
+            padding: 20px 10px;
+            border-radius: 24px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.08s linear, box-shadow 0.1s;
+            box-shadow: 0 8px 0 #0f121c;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .clicker-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #0f121c;
+        }
+
+        .shop-row, .priv-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0e121fcc;
+            padding: 10px 16px;
+            border-radius: 60px;
+            margin-bottom: 10px;
+        }
+
+        .casino-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .bet-input {
+            background: #010101;
+            border: 1px solid #2eff9e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 40px;
+            width: 120px;
+        }
+
+        .collection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .nft-card {
+            background: linear-gradient(145deg, #1f1b1b, #0f0c0a);
+            border-radius: 24px;
+            padding: 8px;
+            width: 100px;
+            text-align: center;
+            border: 1px solid #ffcd7e;
+            cursor: pointer;
+        }
+
+        .nft-card.owned {
+            background: #2a451f;
+            border-color: gold;
+        }
+
+        .admin-panel {
+            background: #0a0c16;
+            border-radius: 32px;
+            padding: 18px;
+            border: 2px solid crimson;
+            margin-top: 10px;
+        }
+
+        .admin-panel.hidden {
+            display: none;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input, select {
+            background: #222;
+            border: 1px solid #2eff9e;
+            padding: 8px 12px;
+            border-radius: 40px;
+            color: white;
+        }
+
+        .status {
+            background: #000000bb;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="app-container">
+    <div class="top-bar">
+        <div class="logo"><h1>🎴 NFTDimochka</h1></div>
+        <div class="green-title">🌿 ПОДОЛЬСК ДИМАСИК 🌿</div>
+        <div class="coin-panel">🪙 <span class="coin-amount" id="dimochkaCoinsDisplay">0</span></div>
+        <div class="user-area">
+            <span id="userNameSpan" class="status">Гость</span>
+            <button id="loginBtn">🔐 Вход</button>
+            <button id="registerBtn">📝 Регистр</button>
+            <button id="adminToggleBtn" class="btn-gold">👑 Админ</button>
+        </div>
+    </div>
+
+    <div class="grid-2col">
+        <div class="card">
+            <h2>🐹 Хомячий кликер</h2>
+            <div class="clicker-grid" id="clickerGrid"></div>
+            <button id="playGameBtn" class="btn-gold" style="width:100%">🎲 ИГРАТЬ (30 сек)</button>
+            <div class="status" id="gameTimerStatus">⚡ 30 СЕКУНД готово</div>
+        </div>
+        <div class="card">
+            <h2>🎰 КАЗИНО DIMOCHKA</h2>
+            <div class="casino-area">
+                <input type="number" id="betAmount" class="bet-input" value="100" step="50">
+                <button id="coinFlipBtn" class="btn-gold">🪙 ОРЁЛ/РЕШКА</button>
+                <button id="diceBtn" class="btn-gold">🎲 КУБИК (x2)</button>
+            </div>
+            <div id="casinoResult" class="status">💬 Сделай ставку</div>
+        </div>
+    </div>
+
+    <div class="grid-2col">
+        <div class="card">
+            <h2>🛠️ УЛУЧШЕНИЯ</h2>
+            <div id="shopContainer" class="shop-items"></div>
+        </div>
+        <div class="card">
+            <h2>🤖 АВТОКЛИКЕР ЗА 1000</h2>
+            <div id="autoContainer" class="privilege-items"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🃏 КОЛЛЕКЦИЯ КАРТ</h2>
+        <div id="nftCollection" class="collection"></div>
+        <div class="status">★ Владей картами Dimochka</div>
+    </div>
+
+    <div id="adminPanel" class="admin-panel hidden">
+        <h3 style="color:red">🔧 АДМИН (без пароля)</h3>
+        <div class="flex-row">
+            <input type="text" id="adminUser" placeholder="username">
+            <input type="number" id="adminCoins" placeholder="монеты">
+            <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
+            <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
+            <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+        </div>
+        <div id="adminMessage" class="status"></div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let gameActive = false;
+    let clickPower = 1;
+
+    const upgrades = [
+        { id: "power1", name: "🐾 Лапа +1", price: 150, effect: (u) => { u.clickBonus = (u.clickBonus||1)+1; return u; } },
+        { id: "power2", name: "🦷 Клык +3", price: 400, effect: (u) => { u.clickBonus = (u.clickBonus||1)+3; return u; } }
+    ];
+
+    const allCards = [
+        { id: "cardDimochka", name: "Dimochka OG", emoji:"🐹", price:500 },
+        { id: "cardGold", name: "Золотой Хомяк", emoji:"🏆", price:1200 },
+        { id: "cardLucky", name: "Удачливый", emoji:"🍀", price:800 },
+        { id: "cardGamer", name: "Геймер", emoji:"🎮", price:1000 },
+        { id: "cardKing", name: "Король клика", emoji:"👑", price:2000 },
+        { id: "cardCasino", name: "Казино-мастер", emoji:"🎰", price:1500 }
+    ];
+
+    function saveUser(){
+        if(currentUser) localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
+    }
+    function loadUser(username){
+        let raw = localStorage.getItem(`user_${username}`);
+        if(raw){
+            let data = JSON.parse(raw);
+            return { ...data, cardsOwned: data.cardsOwned||[], upgrades: data.upgrades||[], clickBonus: data.clickBonus||1, autoPerSec: data.autoPerSec||0 };
+        }
+        return null;
+    }
+    function createUser(username){
+        return { username, coins:1000, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
+    }
+    function registerUser(username){
+        if(!username.trim()) return false;
+        if(localStorage.getItem(`user_${username}`)) return false;
+        currentUser = createUser(username);
+        localStorage.setItem(`user_${username}`, JSON.stringify(currentUser));
+        syncUI();
+        return true;
+    }
+    function loginUser(username){
+        let data = loadUser(username);
+        if(data){ currentUser = data; syncUI(); return true; }
+        return false;
+    }
+    function syncUI(){
+        if(!currentUser){
+            document.getElementById("dimochkaCoinsDisplay").innerText = "0";
+            document.getElementById("userNameSpan").innerHTML = "Гость";
+            renderShop(); renderAuto(); renderCards();
+            return;
+        }
+        document.getElementById("dimochkaCoinsDisplay").innerText = Math.floor(currentUser.coins);
+        document.getElementById("userNameSpan").innerHTML = `👤 ${currentUser.username}`;
+        clickPower = currentUser.clickBonus;
+        renderShop(); renderAuto(); renderCards();
+        saveUser();
+        if(window.autoInterval) clearInterval(window.autoInterval);
+        window.autoInterval = setInterval(()=>{
+            if(currentUser && currentUser.autoPerSec>0){
+                currentUser.coins += currentUser.autoPerSec;
+                if(currentUser.coins<0) currentUser.coins=0;
+                document.getElementById("dimochkaCoinsDisplay").innerText = Math.floor(currentUser.coins);
+                saveUser();
+            }
+        },1000);
+    }
+    function renderShop(){
+        let container = document.getElementById("shopContainer");
+        if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        container.innerHTML = "";
+        upgrades.forEach(item=>{
+            let owned = (currentUser.upgrades||[]).includes(item.id);
+            let div = document.createElement("div"); div.className="shop-row";
+            div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned?'disabled':''} class="${owned?'':'btn-gold'}">${owned?'✅ Куплено':'Купить'}</button>`;
+            if(!owned) div.querySelector("button").addEventListener("click",()=>{
+                if(currentUser.coins>=item.price){
+                    currentUser.coins -= item.price;
+                    if(!currentUser.upgrades) currentUser.upgrades=[];
+                    currentUser.upgrades.push(item.id);
+                    currentUser = item.effect(currentUser);
+                    syncUI();
+                    showToast(`+ ${item.name}`);
+                } else showToast("Не хватает монет");
+            });
+            container.appendChild(div);
+        });
+    }
+    function renderAuto(){
+        let container = document.getElementById("autoContainer");
+        if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        container.innerHTML = "";
+        let hasAuto = (currentUser.upgrades||[]).includes("auto");
+        let div = document.createElement("div"); div.className="shop-row";
+        let currentLvl = currentUser.autoPerSec||0;
+        div.innerHTML = `<span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">+1 мон/сек | Сейчас: +${currentLvl} мон/сек</span></span>
+                         <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 1000'}</button>`;
+        if(!hasAuto){
+            div.querySelector("button").addEventListener("click",()=>{
+                if(currentUser.coins >= 1000){
+                    currentUser.coins -= 1000;
+                    if(!currentUser.upgrades) currentUser.upgrades=[];
+                    currentUser.upgrades.push("auto");
+                    currentUser.autoPerSec = (currentUser.autoPerSec||0)+1;
+                    syncUI();
+                    showToast("🎫 Автокликер активирован! +1 мон/сек");
+                } else showToast("Нужно 1000 монет");
+            });
+        }
+        container.appendChild(div);
+    }
+    function renderCards(){
+        let container = document.getElementById("nftCollection");
+        if(!currentUser){ container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
+        container.innerHTML = "";
+        allCards.forEach(card=>{
+            let owned = currentUser.cardsOwned.includes(card.id);
+            let cd = document.createElement("div"); cd.className = `nft-card ${owned?'owned':''}`;
+            cd.innerHTML = `<div style="font-size:36px">${card.emoji}</div><div>${card.name}</div><div style="font-size:10px">${owned?'✔️ Владелец':card.price+'🪙'}</div>`;
+            if(!owned){
+                cd.style.cursor = "pointer";
+                cd.addEventListener("click",()=>{
+                    if(currentUser.coins>=card.price){
+                        currentUser.coins-=card.price;
+                        currentUser.cardsOwned.push(card.id);
+                        syncUI();
+                        showToast(`🎉 Карта ${card.name}`);
+                    } else showToast("Монет не хватает");
+                });
+            }
+            container.appendChild(cd);
+        });
+    }
+    function initClicker(){
+        let grid = document.getElementById("clickerGrid"); grid.innerHTML = "";
+        for(let i=0;i<9;i++){
+            let btn = document.createElement("div"); 
+            btn.className = "clicker-btn"; 
+            btn.innerHTML = "🐹";
+            btn.addEventListener("click", ()=>{
+                if(!currentUser){ showToast("Войдите"); return; }
+                currentUser.coins += clickPower;
+                syncUI();
+                btn.style.transform = "scale(0.95)";
+                setTimeout(()=> btn.style.transform = "", 100);
+            });
+            grid.appendChild(btn);
+        }
+    }
+    function startGame30sec(){
+        if(!currentUser){ showToast("Нужен аккаунт"); return; }
+        if(gameActive) return;
+        gameActive=true;
+        let clicks=0, timeLeft=30;
+        const statusDiv = document.getElementById("gameTimerStatus");
+        statusDiv.innerHTML = "⏳ 30 СЕКУНД — КЛИКАЙ!";
+        let timer = setInterval(()=>{
+            if(!gameActive){ clearInterval(timer); return; }
+            timeLeft--;
+            statusDiv.innerHTML = `⏱️ ${timeLeft} сек | Кликов: ${clicks}`;
+            if(timeLeft<=0){
+                clearInterval(timer); gameActive=false;
+                let reward = clicks*5;
+                currentUser.coins += reward;
+                syncUI();
+                statusDiv.innerHTML = `✅ +${reward} монет (${clicks} кликов)`;
+            }
+        },1000);
+        let handler = (e)=>{
+            if(!gameActive){ document.removeEventListener("click",handler); return; }
+            if(e.target.closest('.clicker-btn')) clicks++;
+        };
+        document.addEventListener("click",handler);
+        setTimeout(()=>{ gameActive=false; document.removeEventListener("click",handler); },30000);
+    }
+    function casinoCoinFlip(bet){
+        if(!currentUser) return "🔒 Войдите";
+        if(currentUser.coins<bet) return "❌ Не хватает";
+        let win = Math.random()<0.5;
+        if(win){ currentUser.coins+=bet; syncUI(); return `🪙 ОРЁЛ! +${bet}`; }
+        else{ currentUser.coins-=bet; syncUI(); return `🪙 РЕШКА! -${bet}`; }
+    }
+    function casinoDice(bet){
+        if(!currentUser) return "🔒 Войдите";
+        if(currentUser.coins<bet) return "❌ Не хватает";
+        let d = Math.floor(Math.random()*6)+1;
+        if(d>=4){ let win=bet*2; currentUser.coins+=win; syncUI(); return `🎲 ${d}! ВЫИГРЫШ x2 +${win}`; }
+        else{ currentUser.coins-=bet; syncUI(); return `🎲 ${d} Проигрыш -${bet}`; }
+    }
+    function showToast(msg){
+        let t = document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="20px"; t.style.left="20px"; t.style.background="#000000cc"; t.style.color="#2eff9e"; t.style.padding="8px 16px"; t.style.borderRadius="40px"; t.style.zIndex="9999"; document.body.appendChild(t); setTimeout(()=>t.remove(),1800);
+    }
+
+    document.getElementById("adminToggleBtn").addEventListener("click",()=>{
+        document.getElementById("adminPanel").classList.toggle("hidden");
+    });
+    document.getElementById("adminSetCoinsBtn").addEventListener("click",()=>{
+        let name = document.getElementById("adminUser").value.trim();
+        let val = parseInt(document.getElementById("adminCoins").value);
+        if(!name||isNaN(val)){ showToast("Введите имя и сумму"); return; }
+        let target = loadUser(name);
+        if(target){
+            target.coins += val;
+            localStorage.setItem(`user_${name}`, JSON.stringify(target));
+            if(currentUser && currentUser.username===name){ currentUser.coins = target.coins; syncUI(); }
+            showToast(`✅ ${name} +${val} монет`);
+        } else showToast("Пользователь не найден");
+    });
+    document.getElementById("adminGiveCardBtn").addEventListener("click",()=>{
+        let name = document.getElementById("adminUser").value.trim();
+        if(!name){ showToast("Введите имя"); return; }
+        let target = loadUser(name);
+        if(target){
+            let allIds = allCards.map(c=>c.id);
+            target.cardsOwned = [...new Set([...target.cardsOwned, ...allIds])];
+            localStorage.setItem(`user_${name}`, JSON.stringify(target));
+            if(currentUser && currentUser.username===name){ currentUser.cardsOwned = target.cardsOwned; syncUI(); }
+            showToast(`💎 Все карты для ${name}`);
+        } else showToast("Нет юзера");
+    });
+    document.getElementById("adminResetGameBtn").addEventListener("click",()=>{
+        if(confirm("Сбросить всех пользователей?")){ localStorage.clear(); currentUser=null; syncUI(); showToast("Сброшено"); location.reload(); }
+    });
+    document.getElementById("loginBtn").onclick = ()=>{ let n = prompt("Логин:"); if(n && loginUser(n)) showToast(`Привет, ${n}`); else showToast("Нет такого"); };
+    document.getElementById("registerBtn").onclick = ()=>{ let n = prompt("Новый логин:"); if(n && registerUser(n)) showToast(`Аккаунт ${n} создан +1000`); else if(n) showToast("Занято"); };
+    document.getElementById("playGameBtn").onclick = startGame30sec;
+    document.getElementById("coinFlipBtn").onclick = ()=>{ let bet = parseInt(document.getElementById("betAmount").value)||100; document.getElementById("casinoResult").innerText = casinoCoinFlip(bet); };
+    document.getElementById("diceBtn").onclick = ()=>{ let bet = parseInt(document.getElementById("betAmount").value)||100; document.getElementById("casinoResult").innerText = casinoDice(bet); };
+    initClicker();
+    syncUI();
+</script>
+</body>
+</html>
