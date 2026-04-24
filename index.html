@@ -29,7 +29,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0)), radial-gradient(3px 3px at 75% 45%, #ffdd99, rgba(0,0,0,0));
+            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0));
             background-repeat: no-repeat;
             animation: starsShift 50s linear infinite;
             opacity: 0.8;
@@ -63,7 +63,6 @@
             gap: 24px;
         }
 
-        /* Табы */
         .tabs {
             display: flex;
             gap: 12px;
@@ -264,7 +263,6 @@
             border-color: gold;
         }
 
-        /* Таблица пользователей */
         .users-table {
             width: 100%;
             border-collapse: collapse;
@@ -306,10 +304,6 @@
             margin-top: 10px;
         }
 
-        .admin-panel.hidden {
-            display: none;
-        }
-
         .flex-row {
             display: flex;
             flex-wrap: wrap;
@@ -338,7 +332,6 @@
             margin-left: 10px;
         }
 
-        /* Соцсети стили */
         .social-links {
             display: flex;
             flex-direction: column;
@@ -398,11 +391,9 @@
             <span id="userNameSpan" class="status">Гость</span>
             <button id="loginBtn">🔐 Вход</button>
             <button id="registerBtn">📝 Регистр</button>
-            <button id="adminToggleBtn" class="btn-gold">👑 Админ</button>
         </div>
     </div>
 
-    <!-- Табы -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="game">🎮 Игра</button>
         <button class="tab-btn" data-tab="admin">👑 Админ панель</button>
@@ -464,11 +455,9 @@
                     🟢 Режим администратора активен
                 </div>
 
-                <!-- Онлайн пользователи -->
                 <h3>🟢 Онлайн сейчас <span id="onlineCount" class="online-count">0</span></h3>
                 <div id="onlineUsersList" class="status" style="margin-bottom: 20px;"></div>
 
-                <!-- Список всех пользователей -->
                 <h3>📋 Все пользователи (с паролями)</h3>
                 <div style="overflow-x: auto;">
                     <table class="users-table" id="usersTable">
@@ -479,7 +468,6 @@
                     </table>
                 </div>
 
-                <!-- Управление -->
                 <h3 style="margin-top: 20px;">💰 Управление</h3>
                 <div class="flex-row">
                     <input type="text" id="adminUser" placeholder="username">
@@ -508,23 +496,19 @@
                         <button class="join-btn btn-gold">🔗 ПОДПИСАТЬСЯ</button>
                     </a>
                 </div>
-                <div class="status" style="text-align: center;">
-                    ⭐ Подпишись на наш Telegram, чтобы не пропустить новые фишки и бонусы!
-                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ПАРОЛЬ АДМИНА
     const ADMIN_PASSWORD = "dimochka2024";
     
     let currentUser = null;
     let gameActive = false;
     let clickPower = 1;
     let isAdminUnlocked = false;
-    let activeUsers = new Map(); // username -> timestamp
+    let activeUsers = new Map();
 
     const upgrades = [
         { id: "power1", name: "🐾 Лапа +1", price: 150, effect: (u) => { u.clickBonus = (u.clickBonus||1)+1; return u; } },
@@ -540,32 +524,22 @@
         { id: "cardCasino", name: "Казино-мастер", emoji:"🎰", price:1500 }
     ];
 
-    // Обновление онлайна
     function updateOnlineStatus() {
         if (currentUser) {
             activeUsers.set(currentUser.username, Date.now());
         }
-        // Удаляем неактивных (последняя активность > 30 секунд)
         const now = Date.now();
         for (let [user, time] of activeUsers) {
-            if (now - time > 30000) {
-                activeUsers.delete(user);
-            }
+            if (now - time > 30000) activeUsers.delete(user);
         }
         
         if (isAdminUnlocked && document.getElementById("adminContent").style.display !== "none") {
-            const onlineCount = activeUsers.size;
-            document.getElementById("onlineCount").innerText = onlineCount;
-            if (onlineCount === 0) {
-                document.getElementById("onlineUsersList").innerHTML = "🔴 Нет активных пользователей";
-            } else {
-                document.getElementById("onlineUsersList").innerHTML = Array.from(activeUsers.keys()).map(u => `🟢 ${u}`).join(", ");
-            }
+            document.getElementById("onlineCount").innerText = activeUsers.size;
+            document.getElementById("onlineUsersList").innerHTML = activeUsers.size === 0 ? "🔴 Нет активных пользователей" : Array.from(activeUsers.keys()).map(u => `🟢 ${u}`).join(", ");
             renderUsersTable();
         }
     }
 
-    // Получить всех пользователей
     function getAllUsers() {
         let users = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -573,27 +547,24 @@
             if (key && key.startsWith("user_")) {
                 try {
                     let userData = JSON.parse(localStorage.getItem(key));
-                    if (userData && userData.username) {
-                        users.push(userData);
-                    }
+                    if (userData && userData.username) users.push(userData);
                 } catch(e) {}
             }
         }
         return users;
     }
 
-    // Отображение таблицы пользователей
     function renderUsersTable() {
         let users = getAllUsers();
         users.sort((a,b) => (b.coins||0) - (a.coins||0));
         let tbody = document.getElementById("usersTableBody");
         tbody.innerHTML = "";
         users.forEach(user => {
-            let row = tbody.insertRow();
             let isOnline = activeUsers.has(user.username);
+            let row = tbody.insertRow();
             row.innerHTML = `
                 <td>${user.username}</td>
-                <td style="color: #ffcc88;">${user.password || "без пароля"}</td>
+                <td style="color: #ffcc88;">${user.password || user.username}</td>
                 <td>💰 ${Math.floor(user.coins || 0)}</td>
                 <td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td>
                 <td>${isOnline ? '<span class="online-badge"></span> Онлайн' : '⚫ Офлайн'}</td>
@@ -604,49 +575,48 @@
         }
     }
 
-    function saveUser(){
-        if(currentUser) {
-            // Сохраняем пароль (для демо - логин и есть пароль)
+    function saveUser() {
+        if (currentUser) {
             currentUser.password = currentUser.username;
             localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
         }
     }
     
-    function loadUser(username){
+    function loadUser(username) {
         let raw = localStorage.getItem(`user_${username}`);
-        if(raw){
+        if (raw) {
             let data = JSON.parse(raw);
             return { ...data, cardsOwned: data.cardsOwned||[], upgrades: data.upgrades||[], clickBonus: data.clickBonus||1, autoPerSec: data.autoPerSec||0, password: data.password || username };
         }
         return null;
     }
     
-    function createUser(username){
-        return { username, password: username, coins:1600, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
+    function createUser(username) {
+        return { username, password: username, coins: 1600, cardsOwned: [], upgrades: [], clickBonus: 1, autoPerSec: 0 };
     }
     
-    function registerUser(username){
-        if(!username.trim()) return false;
-        if(localStorage.getItem(`user_${username}`)) return false;
+    function registerUser(username) {
+        if (!username.trim()) return false;
+        if (localStorage.getItem(`user_${username}`)) return false;
         currentUser = createUser(username);
         localStorage.setItem(`user_${username}`, JSON.stringify(currentUser));
         syncUI();
         return true;
     }
     
-    function loginUser(username){
+    function loginUser(username) {
         let data = loadUser(username);
-        if(data){ 
-            currentUser = data; 
-            syncUI(); 
+        if (data) {
+            currentUser = data;
+            syncUI();
             updateOnlineStatus();
-            return true; 
+            return true;
         }
         return false;
     }
     
-    function syncUI(){
-        if(!currentUser){
+    function syncUI() {
+        if (!currentUser) {
             document.getElementById("dimochkaCoinsDisplay").innerText = "0";
             document.getElementById("userNameSpan").innerHTML = "Гость";
             renderShop(); renderAuto(); renderCards();
@@ -657,56 +627,60 @@
         clickPower = currentUser.clickBonus;
         renderShop(); renderAuto(); renderCards();
         saveUser();
-        if(window.autoInterval) clearInterval(window.autoInterval);
-        window.autoInterval = setInterval(()=>{
-            if(currentUser && currentUser.autoPerSec>0){
+        if (window.autoInterval) clearInterval(window.autoInterval);
+        window.autoInterval = setInterval(() => {
+            if (currentUser && currentUser.autoPerSec > 0) {
                 currentUser.coins += currentUser.autoPerSec;
-                if(currentUser.coins<0) currentUser.coins=0;
+                if (currentUser.coins < 0) currentUser.coins = 0;
                 document.getElementById("dimochkaCoinsDisplay").innerText = Math.floor(currentUser.coins);
                 saveUser();
             }
-        },1000);
+        }, 1000);
         updateOnlineStatus();
     }
     
-    function renderShop(){
+    function renderShop() {
         let container = document.getElementById("shopContainer");
-        if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
         container.innerHTML = "";
         upgrades.forEach(item => {
-            let owned = (currentUser.upgrades||[]).includes(item.id);
-            let div = document.createElement("div"); div.className="shop-row";
-            div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned?'disabled':''} class="${owned?'':'btn-gold'}">${owned?'✅ Куплено':'Купить'}</button>`;
-            if(!owned) div.querySelector("button").addEventListener("click",()=>{
-                if(currentUser.coins>=item.price){
-                    currentUser.coins -= item.price;
-                    if(!currentUser.upgrades) currentUser.upgrades=[];
-                    currentUser.upgrades.push(item.id);
-                    currentUser = item.effect(currentUser);
-                    syncUI();
-                    showToast(`+ ${item.name}`);
-                } else showToast("Не хватает монет");
-            });
+            let owned = (currentUser.upgrades || []).includes(item.id);
+            let div = document.createElement("div");
+            div.className = "shop-row";
+            div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned ? 'disabled' : ''} class="${owned ? '' : 'btn-gold'}">${owned ? '✅ Куплено' : 'Купить'}</button>`;
+            if (!owned) {
+                div.querySelector("button").addEventListener("click", () => {
+                    if (currentUser.coins >= item.price) {
+                        currentUser.coins -= item.price;
+                        if (!currentUser.upgrades) currentUser.upgrades = [];
+                        currentUser.upgrades.push(item.id);
+                        currentUser = item.effect(currentUser);
+                        syncUI();
+                        showToast(`+ ${item.name}`);
+                    } else showToast("Не хватает монет");
+                });
+            }
             container.appendChild(div);
         });
     }
     
-    function renderAuto(){
+    function renderAuto() {
         let container = document.getElementById("autoContainer");
-        if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
         container.innerHTML = "";
-        let hasAuto = (currentUser.upgrades||[]).includes("auto");
-        let div = document.createElement("div"); div.className="shop-row";
-        let currentLvl = currentUser.autoPerSec||0;
+        let hasAuto = (currentUser.upgrades || []).includes("auto");
+        let div = document.createElement("div");
+        div.className = "shop-row";
+        let currentLvl = currentUser.autoPerSec || 0;
         div.innerHTML = `<span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">+1 мон/сек | Сейчас: +${currentLvl} мон/сек</span></span>
                          <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 100000'}</button>`;
-        if(!hasAuto){
-            div.querySelector("button").addEventListener("click",()=>{
-                if(currentUser.coins >= 100000){
+        if (!hasAuto) {
+            div.querySelector("button").addEventListener("click", () => {
+                if (currentUser.coins >= 100000) {
                     currentUser.coins -= 100000;
-                    if(!currentUser.upgrades) currentUser.upgrades=[];
+                    if (!currentUser.upgrades) currentUser.upgrades = [];
                     currentUser.upgrades.push("auto");
-                    currentUser.autoPerSec = (currentUser.autoPerSec||0)+1;
+                    currentUser.autoPerSec = (currentUser.autoPerSec || 0) + 1;
                     syncUI();
                     showToast("🎫 Автокликер активирован! +1 мон/сек");
                 } else showToast("Нужно 100000 монет");
@@ -715,19 +689,20 @@
         container.appendChild(div);
     }
     
-    function renderCards(){
+    function renderCards() {
         let container = document.getElementById("nftCollection");
-        if(!currentUser){ container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
+        if (!currentUser) { container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
         container.innerHTML = "";
-        allCards.forEach(card=>{
+        allCards.forEach(card => {
             let owned = currentUser.cardsOwned.includes(card.id);
-            let cd = document.createElement("div"); cd.className = `nft-card ${owned?'owned':''}`;
-            cd.innerHTML = `<div style="font-size:36px">${card.emoji}</div><div>${card.name}</div><div style="font-size:10px">${owned?'✔️ Владелец':card.price+'🪙'}</div>`;
-            if(!owned){
+            let cd = document.createElement("div");
+            cd.className = `nft-card ${owned ? 'owned' : ''}`;
+            cd.innerHTML = `<div style="font-size:36px">${card.emoji}</div><div>${card.name}</div><div style="font-size:10px">${owned ? '✔️ Владелец' : card.price + '🪙'}</div>`;
+            if (!owned) {
                 cd.style.cursor = "pointer";
-                cd.addEventListener("click",()=>{
-                    if(currentUser.coins>=card.price){
-                        currentUser.coins-=card.price;
+                cd.addEventListener("click", () => {
+                    if (currentUser.coins >= card.price) {
+                        currentUser.coins -= card.price;
                         currentUser.cardsOwned.push(card.id);
                         syncUI();
                         showToast(`🎉 Карта ${card.name}`);
@@ -738,105 +713,107 @@
         });
     }
     
-    function initClicker(){
-        let grid = document.getElementById("clickerGrid"); grid.innerHTML = "";
-        for(let i=0;i<9;i++){
-            let btn = document.createElement("div"); 
-            btn.className = "clicker-btn"; 
+    function initClicker() {
+        let grid = document.getElementById("clickerGrid");
+        grid.innerHTML = "";
+        for (let i = 0; i < 9; i++) {
+            let btn = document.createElement("div");
+            btn.className = "clicker-btn";
             btn.innerHTML = "🐹";
-            btn.addEventListener("click", ()=>{
-                if(!currentUser){ showToast("Войдите"); return; }
+            btn.addEventListener("click", () => {
+                if (!currentUser) { showToast("Войдите"); return; }
                 currentUser.coins += clickPower;
                 syncUI();
                 btn.style.transform = "scale(0.95)";
-                setTimeout(()=> btn.style.transform = "", 100);
+                setTimeout(() => btn.style.transform = "", 100);
             });
             grid.appendChild(btn);
         }
     }
     
-    function startGame30sec(){
-        if(!currentUser){ showToast("Нужен аккаунт"); return; }
-        if(gameActive) return;
-        gameActive=true;
-        let clicks=0, timeLeft=30;
+    function startGame30sec() {
+        if (!currentUser) { showToast("Нужен аккаунт"); return; }
+        if (gameActive) return;
+        gameActive = true;
+        let clicks = 0, timeLeft = 30;
         const statusDiv = document.getElementById("gameTimerStatus");
         statusDiv.innerHTML = "⏳ 30 СЕКУНД — КЛИКАЙ!";
-        let timer = setInterval(()=>{
-            if(!gameActive){ clearInterval(timer); return; }
+        let timer = setInterval(() => {
+            if (!gameActive) { clearInterval(timer); return; }
             timeLeft--;
             statusDiv.innerHTML = `⏱️ ${timeLeft} сек | Кликов: ${clicks}`;
-            if(timeLeft<=0){
-                clearInterval(timer); gameActive=false;
-                let reward = clicks*5;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                gameActive = false;
+                let reward = clicks * 5;
                 currentUser.coins += reward;
                 syncUI();
                 statusDiv.innerHTML = `✅ +${reward} монет (${clicks} кликов)`;
             }
-        },1000);
-        let handler = (e)=>{
-            if(!gameActive){ document.removeEventListener("click",handler); return; }
-            if(e.target.closest('.clicker-btn')) clicks++;
+        }, 1000);
+        let handler = (e) => {
+            if (!gameActive) { document.removeEventListener("click", handler); return; }
+            if (e.target.closest('.clicker-btn')) clicks++;
         };
-        document.addEventListener("click",handler);
-        setTimeout(()=>{ gameActive=false; document.removeEventListener("click",handler); },30000);
+        document.addEventListener("click", handler);
+        setTimeout(() => { gameActive = false; document.removeEventListener("click", handler); }, 30000);
     }
     
-    function casinoCoinFlip(bet){
-        if(!currentUser) return "🔒 Войдите";
-        if(currentUser.coins<bet) return "❌ Не хватает монет";
+    function casinoCoinFlip(bet) {
+        if (!currentUser) return "🔒 Войдите";
+        if (currentUser.coins < bet) return "❌ Не хватает монет";
         let win = Math.random() < 0.45;
-        if(win){ 
-            currentUser.coins += bet; 
-            syncUI(); 
-            return `🪙 ОРЁЛ! +${bet} монет (Шанс 45%)`;
-        } else { 
-            currentUser.coins -= bet; 
-            syncUI(); 
-            return `🪙 РЕШКА! -${bet} монет (Шанс 55%)`;
+        if (win) {
+            currentUser.coins += bet;
+            syncUI();
+            return `🪙 ОРЁЛ! +${bet} монет (45%)`;
+        } else {
+            currentUser.coins -= bet;
+            syncUI();
+            return `🪙 РЕШКА! -${bet} монет (55%)`;
         }
     }
     
-    function casinoDice(bet){
-        if(!currentUser) return "🔒 Войдите";
-        if(currentUser.coins<bet) return "❌ Не хватает монет";
-        let d = Math.floor(Math.random()*6)+1;
-        if(d>=5){ 
-            let win=bet*2; 
-            currentUser.coins += win; 
-            syncUI(); 
-            return `🎲 ${d}! ВЫИГРЫШ x2 +${win} монет (33% шанс)`;
-        } else { 
-            currentUser.coins -= bet; 
-            syncUI(); 
-            return `🎲 ${d} Проигрыш -${bet} монет (67% шанс)`;
+    function casinoDice(bet) {
+        if (!currentUser) return "🔒 Войдите";
+        if (currentUser.coins < bet) return "❌ Не хватает монет";
+        let d = Math.floor(Math.random() * 6) + 1;
+        if (d >= 5) {
+            let win = bet * 2;
+            currentUser.coins += win;
+            syncUI();
+            return `🎲 ${d}! ВЫИГРЫШ x2 +${win} монет (33%)`;
+        } else {
+            currentUser.coins -= bet;
+            syncUI();
+            return `🎲 ${d} Проигрыш -${bet} монет (67%)`;
         }
     }
     
-    function showToast(msg){
-        let t = document.createElement("div"); 
-        t.innerText=msg; 
-        t.style.position="fixed"; 
-        t.style.bottom="20px"; 
-        t.style.left="20px"; 
-        t.style.background="#000000cc"; 
-        t.style.color="#2eff9e"; 
-        t.style.padding="8px 16px"; 
-        t.style.borderRadius="40px"; 
-        t.style.zIndex="9999"; 
-        t.style.fontWeight="bold";
-        document.body.appendChild(t); 
-        setTimeout(()=>t.remove(),2000);
+    function showToast(msg) {
+        let t = document.createElement("div");
+        t.innerText = msg;
+        t.style.position = "fixed";
+        t.style.bottom = "20px";
+        t.style.left = "20px";
+        t.style.background = "#000000cc";
+        t.style.color = "#2eff9e";
+        t.style.padding = "8px 16px";
+        t.style.borderRadius = "40px";
+        t.style.zIndex = "9999";
+        t.style.fontWeight = "bold";
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2000);
     }
     
     function unlockAdmin(password) {
-        if(password === ADMIN_PASSWORD) {
+        if (password === ADMIN_PASSWORD) {
             isAdminUnlocked = true;
             document.getElementById("adminContent").style.display = "block";
             document.getElementById("adminLockBlock").style.display = "none";
             showToast("✅ Доступ к админ-панели получен!");
             updateOnlineStatus();
-            setInterval(updateOnlineStatus, 10000);
+            setInterval(updateOnlineStatus, 5000);
             return true;
         } else {
             showToast("❌ Неверный пароль!");
@@ -844,91 +821,86 @@
         }
     }
     
-    // Обработка вкладок
+    // Табы
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab + "Tab").classList.add("active");
-            if (btn.dataset.tab === "admin" && isAdminUnlocked) {
-                updateOnlineStatus();
-            }
+            if (btn.dataset.tab === "admin" && isAdminUnlocked) updateOnlineStatus();
         });
     });
     
+    // Админ кнопки
     document.getElementById("unlockAdminBtn2").addEventListener("click", () => {
-        let password = document.getElementById("adminPasswordInput").value;
-        unlockAdmin(password);
+        unlockAdmin(document.getElementById("adminPasswordInput").value);
     });
     
     document.getElementById("adminSetCoinsBtn").addEventListener("click", () => {
-        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
         let name = document.getElementById("adminUser").value.trim();
         let val = parseInt(document.getElementById("adminCoins").value);
-        if(!name||isNaN(val)){ showToast("Введите имя и сумму"); return; }
+        if (!name || isNaN(val)) { showToast("Введите имя и сумму"); return; }
         let target = loadUser(name);
-        if(target){
+        if (target) {
             target.coins += val;
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
-            if(currentUser && currentUser.username===name){ currentUser.coins = target.coins; syncUI(); }
+            if (currentUser && currentUser.username === name) { currentUser.coins = target.coins; syncUI(); }
             showToast(`✅ ${name} +${val} монет`);
             renderUsersTable();
         } else showToast("Пользователь не найден");
     });
     
     document.getElementById("adminGiveCardBtn").addEventListener("click", () => {
-        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
         let name = document.getElementById("adminUser").value.trim();
-        if(!name){ showToast("Введите имя"); return; }
+        if (!name) { showToast("Введите имя"); return; }
         let target = loadUser(name);
-        if(target){
-            let allIds = allCards.map(c=>c.id);
+        if (target) {
+            let allIds = allCards.map(c => c.id);
             target.cardsOwned = [...new Set([...target.cardsOwned, ...allIds])];
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
-            if(currentUser && currentUser.username===name){ currentUser.cardsOwned = target.cardsOwned; syncUI(); }
+            if (currentUser && currentUser.username === name) { currentUser.cardsOwned = target.cardsOwned; syncUI(); }
             showToast(`💎 Все карты для ${name}`);
             renderUsersTable();
         } else showToast("Нет юзера");
     });
     
     document.getElementById("adminResetGameBtn").addEventListener("click", () => {
-        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
-        if(confirm("Сбросить всех пользователей? Это действие необратимо!")){ 
-            localStorage.clear(); 
-            currentUser=null; 
-            syncUI(); 
-            showToast("Все данные сброшены"); 
-            location.reload(); 
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        if (confirm("Сбросить всех пользователей? Это действие необратимо!")) {
+            localStorage.clear();
+            currentUser = null;
+            syncUI();
+            showToast("Все данные сброшены");
+            location.reload();
         }
     });
     
-    document.getElementById("loginBtn").onclick = () => { 
-        let n = prompt("Логин:"); 
-        if(n && loginUser(n)) showToast(`Привет, ${n}!`); 
-        else if(n) showToast("Нет такого пользователя"); 
+    document.getElementById("loginBtn").onclick = () => {
+        let n = prompt("Логин:");
+        if (n && loginUser(n)) showToast(`Привет, ${n}!`);
+        else if (n) showToast("Нет такого пользователя");
     };
     
-    document.getElementById("registerBtn").onclick = () => { 
-        let n = prompt("Новый логин:"); 
-        if(n && registerUser(n)) showToast(`Аккаунт ${n} создан +1600 монет!`); 
-        else if(n) showToast("Имя занято"); 
+    document.getElementById("registerBtn").onclick = () => {
+        let n = prompt("Новый логин:");
+        if (n && registerUser(n)) showToast(`Аккаунт ${n} создан +1600 монет!`);
+        else if (n) showToast("Имя занято");
     };
     
     document.getElementById("playGameBtn").onclick = startGame30sec;
-    document.getElementById("coinFlipBtn").onclick = () => { 
-        let bet = parseInt(document.getElementById("betAmount").value)||100; 
-        document.getElementById("casinoResult").innerText = casinoCoinFlip(bet); 
+    document.getElementById("coinFlipBtn").onclick = () => {
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
+        document.getElementById("casinoResult").innerText = casinoCoinFlip(bet);
     };
-    document.getElementById("diceBtn").onclick = () => { 
-        let bet = parseInt(document.getElementById("betAmount").value)||100; 
-        document.getElementById("casinoResult").innerText = casinoDice(bet); 
+    document.getElementById("diceBtn").onclick = () => {
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
+        document.getElementById("casinoResult").innerText = casinoDice(bet);
     };
     
-    // Обновление онлайна при кликах
-    setInterval(() => {
-        if(currentUser) updateOnlineStatus();
-    }, 5000);
+    setInterval(() => { if (currentUser) updateOnlineStatus(); }, 5000);
     
     initClicker();
     syncUI();
