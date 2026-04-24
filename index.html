@@ -261,6 +261,12 @@
             padding: 6px 14px;
             font-size: 0.85rem;
         }
+
+        /* Стиль для заблокированной кнопки админа */
+        .admin-locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -302,7 +308,7 @@
             <div id="shopContainer" class="shop-items"></div>
         </div>
         <div class="card">
-            <h2>🤖 АВТОКЛИКЕР ЗА 1000</h2>
+            <h2>🤖 АВТОКЛИКЕР ЗА 100000</h2>
             <div id="autoContainer" class="privilege-items"></div>
         </div>
     </div>
@@ -314,22 +320,32 @@
     </div>
 
     <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="color:red">🔧 АДМИН (без пароля)</h3>
+        <h3 style="color:red">🔧 АДМИН-ПАНЕЛЬ (требуется пароль)</h3>
         <div class="flex-row">
-            <input type="text" id="adminUser" placeholder="username">
-            <input type="number" id="adminCoins" placeholder="монеты">
-            <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
-            <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
-            <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+            <input type="password" id="adminPassword" placeholder="Пароль админа" style="width:150px">
+            <button id="unlockAdminBtn" class="btn-gold">🔓 Разблокировать</button>
         </div>
-        <div id="adminMessage" class="status"></div>
+        <div id="adminLockedContent" style="display:none; margin-top:15px;">
+            <div class="flex-row">
+                <input type="text" id="adminUser" placeholder="username">
+                <input type="number" id="adminCoins" placeholder="монеты">
+                <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
+                <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
+                <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+            </div>
+            <div id="adminMessage" class="status"></div>
+        </div>
     </div>
 </div>
 
 <script>
+    // ПАРОЛЬ АДМИНА (можно изменить)
+    const ADMIN_PASSWORD = "dimochka2024";
+    
     let currentUser = null;
     let gameActive = false;
     let clickPower = 1;
+    let isAdminUnlocked = false;
 
     const upgrades = [
         { id: "power1", name: "🐾 Лапа +1", price: 150, effect: (u) => { u.clickBonus = (u.clickBonus||1)+1; return u; } },
@@ -348,6 +364,7 @@
     function saveUser(){
         if(currentUser) localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
     }
+    
     function loadUser(username){
         let raw = localStorage.getItem(`user_${username}`);
         if(raw){
@@ -356,9 +373,11 @@
         }
         return null;
     }
+    
     function createUser(username){
-        return { username, coins:1000, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
+        return { username, coins:1600, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
     }
+    
     function registerUser(username){
         if(!username.trim()) return false;
         if(localStorage.getItem(`user_${username}`)) return false;
@@ -367,11 +386,13 @@
         syncUI();
         return true;
     }
+    
     function loginUser(username){
         let data = loadUser(username);
         if(data){ currentUser = data; syncUI(); return true; }
         return false;
     }
+    
     function syncUI(){
         if(!currentUser){
             document.getElementById("dimochkaCoinsDisplay").innerText = "0";
@@ -394,6 +415,7 @@
             }
         },1000);
     }
+    
     function renderShop(){
         let container = document.getElementById("shopContainer");
         if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
@@ -415,6 +437,7 @@
             container.appendChild(div);
         });
     }
+    
     function renderAuto(){
         let container = document.getElementById("autoContainer");
         if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
@@ -423,21 +446,22 @@
         let div = document.createElement("div"); div.className="shop-row";
         let currentLvl = currentUser.autoPerSec||0;
         div.innerHTML = `<span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">+1 мон/сек | Сейчас: +${currentLvl} мон/сек</span></span>
-                         <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 1000'}</button>`;
+                         <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 100000'}</button>`;
         if(!hasAuto){
             div.querySelector("button").addEventListener("click",()=>{
-                if(currentUser.coins >= 1000){
-                    currentUser.coins -= 1000;
+                if(currentUser.coins >= 100000){
+                    currentUser.coins -= 100000;
                     if(!currentUser.upgrades) currentUser.upgrades=[];
                     currentUser.upgrades.push("auto");
                     currentUser.autoPerSec = (currentUser.autoPerSec||0)+1;
                     syncUI();
                     showToast("🎫 Автокликер активирован! +1 мон/сек");
-                } else showToast("Нужно 1000 монет");
+                } else showToast("Нужно 100000 монет");
             });
         }
         container.appendChild(div);
     }
+    
     function renderCards(){
         let container = document.getElementById("nftCollection");
         if(!currentUser){ container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
@@ -460,6 +484,7 @@
             container.appendChild(cd);
         });
     }
+    
     function initClicker(){
         let grid = document.getElementById("clickerGrid"); grid.innerHTML = "";
         for(let i=0;i<9;i++){
@@ -476,6 +501,7 @@
             grid.appendChild(btn);
         }
     }
+    
     function startGame30sec(){
         if(!currentUser){ showToast("Нужен аккаунт"); return; }
         if(gameActive) return;
@@ -502,28 +528,108 @@
         document.addEventListener("click",handler);
         setTimeout(()=>{ gameActive=false; document.removeEventListener("click",handler); },30000);
     }
+    
+    // Казино с измененными шансами (55% на проигрыш, 45% на выигрыш)
     function casinoCoinFlip(bet){
         if(!currentUser) return "🔒 Войдите";
-        if(currentUser.coins<bet) return "❌ Не хватает";
-        let win = Math.random()<0.5;
-        if(win){ currentUser.coins+=bet; syncUI(); return `🪙 ОРЁЛ! +${bet}`; }
-        else{ currentUser.coins-=bet; syncUI(); return `🪙 РЕШКА! -${bet}`; }
+        if(currentUser.coins<bet) return "❌ Не хватает монет";
+        // Шанс выигрыша 45%, проигрыша 55% (честное казино в пользу заведения)
+        let win = Math.random() < 0.45;
+        if(win){ 
+            currentUser.coins += bet; 
+            syncUI(); 
+            return `🪙 ОРЁЛ! +${bet} монет (Шанс 45%)`;
+        } else { 
+            currentUser.coins -= bet; 
+            syncUI(); 
+            return `🪙 РЕШКА! -${bet} монет (Шанс 55%)`;
+        }
     }
+    
     function casinoDice(bet){
         if(!currentUser) return "🔒 Войдите";
-        if(currentUser.coins<bet) return "❌ Не хватает";
+        if(currentUser.coins<bet) return "❌ Не хватает монет";
         let d = Math.floor(Math.random()*6)+1;
-        if(d>=4){ let win=bet*2; currentUser.coins+=win; syncUI(); return `🎲 ${d}! ВЫИГРЫШ x2 +${win}`; }
-        else{ currentUser.coins-=bet; syncUI(); return `🎲 ${d} Проигрыш -${bet}`; }
+        // Выигрыш только на 5 и 6 (2 шанса из 6 = 33.3%)
+        if(d>=5){ 
+            let win=bet*2; 
+            currentUser.coins += win; 
+            syncUI(); 
+            return `🎲 ${d}! ВЫИГРЫШ x2 +${win} монет (33% шанс)`;
+        } else { 
+            currentUser.coins -= bet; 
+            syncUI(); 
+            return `🎲 ${d} Проигрыш -${bet} монет (67% шанс)`;
+        }
     }
+    
     function showToast(msg){
-        let t = document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="20px"; t.style.left="20px"; t.style.background="#000000cc"; t.style.color="#2eff9e"; t.style.padding="8px 16px"; t.style.borderRadius="40px"; t.style.zIndex="9999"; document.body.appendChild(t); setTimeout(()=>t.remove(),1800);
+        let t = document.createElement("div"); 
+        t.innerText=msg; 
+        t.style.position="fixed"; 
+        t.style.bottom="20px"; 
+        t.style.left="20px"; 
+        t.style.background="#000000cc"; 
+        t.style.color="#2eff9e"; 
+        t.style.padding="8px 16px"; 
+        t.style.borderRadius="40px"; 
+        t.style.zIndex="9999"; 
+        t.style.fontWeight="bold";
+        document.body.appendChild(t); 
+        setTimeout(()=>t.remove(),2000);
     }
-
-    document.getElementById("adminToggleBtn").addEventListener("click",()=>{
-        document.getElementById("adminPanel").classList.toggle("hidden");
+    
+    // Функция для проверки и разблокировки админ-панели
+    function unlockAdminPanel(password) {
+        if(password === ADMIN_PASSWORD) {
+            isAdminUnlocked = true;
+            document.getElementById("adminLockedContent").style.display = "block";
+            document.getElementById("adminPassword").style.display = "none";
+            document.getElementById("unlockAdminBtn").style.display = "none";
+            showToast("✅ Доступ к админ-панели получен!");
+            return true;
+        } else {
+            showToast("❌ Неверный пароль!");
+            return false;
+        }
+    }
+    
+    // Обработчик кнопки админ-панели с запросом пароля
+    document.getElementById("adminToggleBtn").addEventListener("click", () => {
+        const adminPanel = document.getElementById("adminPanel");
+        if (adminPanel.classList.contains("hidden")) {
+            // При открытии запрашиваем пароль, если еще не разблокирован
+            if (!isAdminUnlocked) {
+                const password = prompt("🔐 Введите пароль администратора:");
+                if (password === ADMIN_PASSWORD) {
+                    isAdminUnlocked = true;
+                    adminPanel.classList.remove("hidden");
+                    document.getElementById("adminLockedContent").style.display = "block";
+                    showToast("✅ Добро пожаловать в админ-панель!");
+                } else if (password !== null) {
+                    showToast("❌ Неверный пароль! Доступ запрещен.");
+                    return;
+                } else {
+                    return;
+                }
+            } else {
+                adminPanel.classList.remove("hidden");
+            }
+        } else {
+            adminPanel.classList.add("hidden");
+        }
     });
-    document.getElementById("adminSetCoinsBtn").addEventListener("click",()=>{
+    
+    // Кнопка разблокировки внутри панели (на случай если через prompt не сработало)
+    document.getElementById("unlockAdminBtn").addEventListener("click", () => {
+        let password = document.getElementById("adminPassword").value;
+        if(unlockAdminPanel(password)) {
+            document.getElementById("adminPassword").value = "";
+        }
+    });
+    
+    document.getElementById("adminSetCoinsBtn").addEventListener("click", () => {
+        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
         let name = document.getElementById("adminUser").value.trim();
         let val = parseInt(document.getElementById("adminCoins").value);
         if(!name||isNaN(val)){ showToast("Введите имя и сумму"); return; }
@@ -535,7 +641,9 @@
             showToast(`✅ ${name} +${val} монет`);
         } else showToast("Пользователь не найден");
     });
-    document.getElementById("adminGiveCardBtn").addEventListener("click",()=>{
+    
+    document.getElementById("adminGiveCardBtn").addEventListener("click", () => {
+        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
         let name = document.getElementById("adminUser").value.trim();
         if(!name){ showToast("Введите имя"); return; }
         let target = loadUser(name);
@@ -547,14 +655,40 @@
             showToast(`💎 Все карты для ${name}`);
         } else showToast("Нет юзера");
     });
-    document.getElementById("adminResetGameBtn").addEventListener("click",()=>{
-        if(confirm("Сбросить всех пользователей?")){ localStorage.clear(); currentUser=null; syncUI(); showToast("Сброшено"); location.reload(); }
+    
+    document.getElementById("adminResetGameBtn").addEventListener("click", () => {
+        if(!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        if(confirm("Сбросить всех пользователей? Это действие необратимо!")){ 
+            localStorage.clear(); 
+            currentUser=null; 
+            syncUI(); 
+            showToast("Все данные сброшены"); 
+            location.reload(); 
+        }
     });
-    document.getElementById("loginBtn").onclick = ()=>{ let n = prompt("Логин:"); if(n && loginUser(n)) showToast(`Привет, ${n}`); else showToast("Нет такого"); };
-    document.getElementById("registerBtn").onclick = ()=>{ let n = prompt("Новый логин:"); if(n && registerUser(n)) showToast(`Аккаунт ${n} создан +1000`); else if(n) showToast("Занято"); };
+    
+    document.getElementById("loginBtn").onclick = () => { 
+        let n = prompt("Логин:"); 
+        if(n && loginUser(n)) showToast(`Привет, ${n}!`); 
+        else if(n) showToast("Нет такого пользователя"); 
+    };
+    
+    document.getElementById("registerBtn").onclick = () => { 
+        let n = prompt("Новый логин:"); 
+        if(n && registerUser(n)) showToast(`Аккаунт ${n} создан +1600 монет!`); 
+        else if(n) showToast("Имя занято"); 
+    };
+    
     document.getElementById("playGameBtn").onclick = startGame30sec;
-    document.getElementById("coinFlipBtn").onclick = ()=>{ let bet = parseInt(document.getElementById("betAmount").value)||100; document.getElementById("casinoResult").innerText = casinoCoinFlip(bet); };
-    document.getElementById("diceBtn").onclick = ()=>{ let bet = parseInt(document.getElementById("betAmount").value)||100; document.getElementById("casinoResult").innerText = casinoDice(bet); };
+    document.getElementById("coinFlipBtn").onclick = () => { 
+        let bet = parseInt(document.getElementById("betAmount").value)||100; 
+        document.getElementById("casinoResult").innerText = casinoCoinFlip(bet); 
+    };
+    document.getElementById("diceBtn").onclick = () => { 
+        let bet = parseInt(document.getElementById("betAmount").value)||100; 
+        document.getElementById("casinoResult").innerText = casinoDice(bet); 
+    };
+    
     initClicker();
     syncUI();
 </script>
