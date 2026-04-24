@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NFTDimochka | Хомяки 3x3 с анимацией</title>
+    <title>NFTDimochka | Хомяки 3x3 + Админ панель</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,6 @@
             user-select: none;
         }
 
-        /* КРАСИВЫЙ ЧЁРНЫЙ ФОН С АНИМАЦИЕЙ */
         body {
             min-height: 100vh;
             background: radial-gradient(ellipse at center, #0a0f1a 0%, #03060c 100%);
@@ -30,9 +29,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0)), radial-gradient(3px 3px at 75% 45%, #ffdd99, rgba(0,0,0,0)), radial-gradient(1px 1px at 35% 80%, #ffffff, rgba(0,0,0,0)), radial-gradient(4px 4px at 95% 15%, #ffcc88, rgba(0,0,0,0)), radial-gradient(2px 2px at 55% 92%, #bbffdd, rgba(0,0,0,0));
+            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0)), radial-gradient(3px 3px at 75% 45%, #ffdd99, rgba(0,0,0,0));
             background-repeat: no-repeat;
-            background-size: 450px 450px, 300px 300px, 550px 550px, 400px 400px, 500px 500px;
             animation: starsShift 50s linear infinite;
             opacity: 0.8;
             pointer-events: none;
@@ -56,7 +54,7 @@
         }
 
         .app-container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 5;
@@ -65,7 +63,47 @@
             gap: 24px;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        /* Табы */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #2eff9e;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #2eff9e, #00cc77);
+            color: #000;
+            border-color: gold;
+            box-shadow: 0 0 15px #2eff9e;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .top-bar {
             display: flex;
             flex-wrap: wrap;
@@ -88,7 +126,7 @@
         }
 
         .green-title {
-            font-size: 1.3rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #2eff9e;
             text-shadow: 0 0 6px #00ffaa;
@@ -154,7 +192,6 @@
             margin-bottom: 16px;
         }
 
-        /* СЕТКА ХОМЯКОВ 3×3 как на том сайте */
         .clicker-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -162,7 +199,6 @@
             margin: 20px 0;
         }
 
-        /* КАРТОЧКА ХОМЯКА С АНИМАЦИЕЙ */
         .clicker-btn {
             background: #1e2a3a;
             font-size: 64px;
@@ -170,7 +206,7 @@
             border-radius: 24px;
             cursor: pointer;
             text-align: center;
-            transition: transform 0.08s linear, box-shadow 0.1s;
+            transition: transform 0.08s linear;
             box-shadow: 0 8px 0 #0f121c;
             border: 1px solid rgba(255, 215, 0, 0.4);
         }
@@ -180,7 +216,7 @@
             box-shadow: 0 4px 0 #0f121c;
         }
 
-        .shop-row, .priv-row {
+        .shop-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -228,6 +264,40 @@
             border-color: gold;
         }
 
+        /* Таблица пользователей */
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .users-table th, .users-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #2eff9e;
+        }
+
+        .users-table th {
+            background: #2eff9e33;
+            color: #2eff9e;
+        }
+
+        .online-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2eff9e;
+            box-shadow: 0 0 5px #2eff9e;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
         .admin-panel {
             background: #0a0c16;
             border-radius: 32px;
@@ -262,10 +332,58 @@
             font-size: 0.85rem;
         }
 
-        /* Стиль для заблокированной кнопки админа */
-        .admin-locked {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .online-count {
+            font-size: 1.2rem;
+            color: #2eff9e;
+            margin-left: 10px;
+        }
+
+        /* Соцсети стили */
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .social-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 30px;
+            padding: 25px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid #2eff9e;
+            transition: 0.3s;
+        }
+
+        .social-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px #2eff9e;
+        }
+
+        .social-card a {
+            color: #2eff9e;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .telegram-icon {
+            font-size: 3rem;
+        }
+
+        .join-btn {
+            background: linear-gradient(135deg, #0088cc, #00aaff);
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -284,68 +402,129 @@
         </div>
     </div>
 
-    <div class="grid-2col">
-        <div class="card">
-            <h2>🐹 Хомячий кликер</h2>
-            <div class="clicker-grid" id="clickerGrid"></div>
-            <button id="playGameBtn" class="btn-gold" style="width:100%">🎲 ИГРАТЬ (30 сек)</button>
-            <div class="status" id="gameTimerStatus">⚡ 30 СЕКУНД готово</div>
-        </div>
-        <div class="card">
-            <h2>🎰 КАЗИНО DIMOCHKA</h2>
-            <div class="casino-area">
-                <input type="number" id="betAmount" class="bet-input" value="100" step="50">
-                <button id="coinFlipBtn" class="btn-gold">🪙 ОРЁЛ/РЕШКА</button>
-                <button id="diceBtn" class="btn-gold">🎲 КУБИК (x2)</button>
+    <!-- Табы -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="game">🎮 Игра</button>
+        <button class="tab-btn" data-tab="admin">👑 Админ панель</button>
+        <button class="tab-btn" data-tab="social">📱 Соцсети</button>
+    </div>
+
+    <!-- Вкладка с игрой -->
+    <div id="gameTab" class="tab-content active">
+        <div class="grid-2col">
+            <div class="card">
+                <h2>🐹 Хомячий кликер</h2>
+                <div class="clicker-grid" id="clickerGrid"></div>
+                <button id="playGameBtn" class="btn-gold" style="width:100%">🎲 ИГРАТЬ (30 сек)</button>
+                <div class="status" id="gameTimerStatus">⚡ 30 СЕКУНД готово</div>
             </div>
-            <div id="casinoResult" class="status">💬 Сделай ставку</div>
-        </div>
-    </div>
-
-    <div class="grid-2col">
-        <div class="card">
-            <h2>🛠️ УЛУЧШЕНИЯ</h2>
-            <div id="shopContainer" class="shop-items"></div>
-        </div>
-        <div class="card">
-            <h2>🤖 АВТОКЛИКЕР ЗА 100000</h2>
-            <div id="autoContainer" class="privilege-items"></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>🃏 КОЛЛЕКЦИЯ КАРТ</h2>
-        <div id="nftCollection" class="collection"></div>
-        <div class="status">★ Владей картами Dimochka</div>
-    </div>
-
-    <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="color:red">🔧 АДМИН-ПАНЕЛЬ (требуется пароль)</h3>
-        <div class="flex-row">
-            <input type="password" id="adminPassword" placeholder="Пароль админа" style="width:150px">
-            <button id="unlockAdminBtn" class="btn-gold">🔓 Разблокировать</button>
-        </div>
-        <div id="adminLockedContent" style="display:none; margin-top:15px;">
-            <div class="flex-row">
-                <input type="text" id="adminUser" placeholder="username">
-                <input type="number" id="adminCoins" placeholder="монеты">
-                <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
-                <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
-                <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+            <div class="card">
+                <h2>🎰 КАЗИНО DIMOCHKA</h2>
+                <div class="casino-area">
+                    <input type="number" id="betAmount" class="bet-input" value="100" step="50">
+                    <button id="coinFlipBtn" class="btn-gold">🪙 ОРЁЛ/РЕШКА</button>
+                    <button id="diceBtn" class="btn-gold">🎲 КУБИК (x2)</button>
+                </div>
+                <div id="casinoResult" class="status">💬 Сделай ставку</div>
             </div>
-            <div id="adminMessage" class="status"></div>
+        </div>
+
+        <div class="grid-2col">
+            <div class="card">
+                <h2>🛠️ УЛУЧШЕНИЯ</h2>
+                <div id="shopContainer" class="shop-items"></div>
+            </div>
+            <div class="card">
+                <h2>🤖 АВТОКЛИКЕР ЗА 100000</h2>
+                <div id="autoContainer" class="privilege-items"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🃏 КОЛЛЕКЦИЯ КАРТ</h2>
+            <div id="nftCollection" class="collection"></div>
+            <div class="status">★ Владей картами Dimochka</div>
+        </div>
+    </div>
+
+    <!-- Вкладка с админ панелью -->
+    <div id="adminTab" class="tab-content">
+        <div class="card">
+            <h2>🔧 АДМИН-ПАНЕЛЬ</h2>
+            
+            <div id="adminLockBlock">
+                <div class="flex-row">
+                    <input type="password" id="adminPasswordInput" placeholder="Пароль админа">
+                    <button id="unlockAdminBtn2" class="btn-gold">🔓 Войти в админку</button>
+                </div>
+            </div>
+
+            <div id="adminContent" style="display:none;">
+                <div class="status" style="margin-bottom: 15px; background: #2eff9e22;">
+                    🟢 Режим администратора активен
+                </div>
+
+                <!-- Онлайн пользователи -->
+                <h3>🟢 Онлайн сейчас <span id="onlineCount" class="online-count">0</span></h3>
+                <div id="onlineUsersList" class="status" style="margin-bottom: 20px;"></div>
+
+                <!-- Список всех пользователей -->
+                <h3>📋 Все пользователи (с паролями)</h3>
+                <div style="overflow-x: auto;">
+                    <table class="users-table" id="usersTable">
+                        <thead>
+                            <tr><th>Никнейм</th><th>Пароль</th><th>Монеты</th><th>Карты</th><th>Статус</th></tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Управление -->
+                <h3 style="margin-top: 20px;">💰 Управление</h3>
+                <div class="flex-row">
+                    <input type="text" id="adminUser" placeholder="username">
+                    <input type="number" id="adminCoins" placeholder="монеты">
+                    <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
+                    <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
+                    <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+                </div>
+                <div id="adminMessage" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка с соцсетями -->
+    <div id="socialTab" class="tab-content">
+        <div class="card">
+            <h2>📱 СОЦИАЛЬНЫЕ СЕТИ ПРОЕКТА</h2>
+            <div class="social-links">
+                <div class="social-card">
+                    <a href="https://t.me/Dimochkagame" target="_blank">
+                        <span class="telegram-icon">📱</span>
+                        <span>Telegram канал</span>
+                    </a>
+                    <p style="margin-top: 15px; color: #aaa;">Новости, обновления, розыгрыши и общение</p>
+                    <a href="https://t.me/Dimochkagame" target="_blank">
+                        <button class="join-btn btn-gold">🔗 ПОДПИСАТЬСЯ</button>
+                    </a>
+                </div>
+                <div class="status" style="text-align: center;">
+                    ⭐ Подпишись на наш Telegram, чтобы не пропустить новые фишки и бонусы!
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ПАРОЛЬ АДМИНА (можно изменить)
+    // ПАРОЛЬ АДМИНА
     const ADMIN_PASSWORD = "dimochka2024";
     
     let currentUser = null;
     let gameActive = false;
     let clickPower = 1;
     let isAdminUnlocked = false;
+    let activeUsers = new Map(); // username -> timestamp
 
     const upgrades = [
         { id: "power1", name: "🐾 Лапа +1", price: 150, effect: (u) => { u.clickBonus = (u.clickBonus||1)+1; return u; } },
@@ -361,21 +540,89 @@
         { id: "cardCasino", name: "Казино-мастер", emoji:"🎰", price:1500 }
     ];
 
+    // Обновление онлайна
+    function updateOnlineStatus() {
+        if (currentUser) {
+            activeUsers.set(currentUser.username, Date.now());
+        }
+        // Удаляем неактивных (последняя активность > 30 секунд)
+        const now = Date.now();
+        for (let [user, time] of activeUsers) {
+            if (now - time > 30000) {
+                activeUsers.delete(user);
+            }
+        }
+        
+        if (isAdminUnlocked && document.getElementById("adminContent").style.display !== "none") {
+            const onlineCount = activeUsers.size;
+            document.getElementById("onlineCount").innerText = onlineCount;
+            if (onlineCount === 0) {
+                document.getElementById("onlineUsersList").innerHTML = "🔴 Нет активных пользователей";
+            } else {
+                document.getElementById("onlineUsersList").innerHTML = Array.from(activeUsers.keys()).map(u => `🟢 ${u}`).join(", ");
+            }
+            renderUsersTable();
+        }
+    }
+
+    // Получить всех пользователей
+    function getAllUsers() {
+        let users = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key && key.startsWith("user_")) {
+                try {
+                    let userData = JSON.parse(localStorage.getItem(key));
+                    if (userData && userData.username) {
+                        users.push(userData);
+                    }
+                } catch(e) {}
+            }
+        }
+        return users;
+    }
+
+    // Отображение таблицы пользователей
+    function renderUsersTable() {
+        let users = getAllUsers();
+        users.sort((a,b) => (b.coins||0) - (a.coins||0));
+        let tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+        users.forEach(user => {
+            let row = tbody.insertRow();
+            let isOnline = activeUsers.has(user.username);
+            row.innerHTML = `
+                <td>${user.username}</td>
+                <td style="color: #ffcc88;">${user.password || "без пароля"}</td>
+                <td>💰 ${Math.floor(user.coins || 0)}</td>
+                <td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td>
+                <td>${isOnline ? '<span class="online-badge"></span> Онлайн' : '⚫ Офлайн'}</td>
+            `;
+        });
+        if (users.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>Нет зарегистрированных пользователей</td></tr>";
+        }
+    }
+
     function saveUser(){
-        if(currentUser) localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
+        if(currentUser) {
+            // Сохраняем пароль (для демо - логин и есть пароль)
+            currentUser.password = currentUser.username;
+            localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
+        }
     }
     
     function loadUser(username){
         let raw = localStorage.getItem(`user_${username}`);
         if(raw){
             let data = JSON.parse(raw);
-            return { ...data, cardsOwned: data.cardsOwned||[], upgrades: data.upgrades||[], clickBonus: data.clickBonus||1, autoPerSec: data.autoPerSec||0 };
+            return { ...data, cardsOwned: data.cardsOwned||[], upgrades: data.upgrades||[], clickBonus: data.clickBonus||1, autoPerSec: data.autoPerSec||0, password: data.password || username };
         }
         return null;
     }
     
     function createUser(username){
-        return { username, coins:1600, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
+        return { username, password: username, coins:1600, cardsOwned:[], upgrades:[], clickBonus:1, autoPerSec:0 };
     }
     
     function registerUser(username){
@@ -389,7 +636,12 @@
     
     function loginUser(username){
         let data = loadUser(username);
-        if(data){ currentUser = data; syncUI(); return true; }
+        if(data){ 
+            currentUser = data; 
+            syncUI(); 
+            updateOnlineStatus();
+            return true; 
+        }
         return false;
     }
     
@@ -414,13 +666,14 @@
                 saveUser();
             }
         },1000);
+        updateOnlineStatus();
     }
     
     function renderShop(){
         let container = document.getElementById("shopContainer");
         if(!currentUser){ container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
         container.innerHTML = "";
-        upgrades.forEach(item=>{
+        upgrades.forEach(item => {
             let owned = (currentUser.upgrades||[]).includes(item.id);
             let div = document.createElement("div"); div.className="shop-row";
             div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned?'disabled':''} class="${owned?'':'btn-gold'}">${owned?'✅ Куплено':'Купить'}</button>`;
@@ -529,11 +782,9 @@
         setTimeout(()=>{ gameActive=false; document.removeEventListener("click",handler); },30000);
     }
     
-    // Казино с измененными шансами (55% на проигрыш, 45% на выигрыш)
     function casinoCoinFlip(bet){
         if(!currentUser) return "🔒 Войдите";
         if(currentUser.coins<bet) return "❌ Не хватает монет";
-        // Шанс выигрыша 45%, проигрыша 55% (честное казино в пользу заведения)
         let win = Math.random() < 0.45;
         if(win){ 
             currentUser.coins += bet; 
@@ -550,7 +801,6 @@
         if(!currentUser) return "🔒 Войдите";
         if(currentUser.coins<bet) return "❌ Не хватает монет";
         let d = Math.floor(Math.random()*6)+1;
-        // Выигрыш только на 5 и 6 (2 шанса из 6 = 33.3%)
         if(d>=5){ 
             let win=bet*2; 
             currentUser.coins += win; 
@@ -579,14 +829,14 @@
         setTimeout(()=>t.remove(),2000);
     }
     
-    // Функция для проверки и разблокировки админ-панели
-    function unlockAdminPanel(password) {
+    function unlockAdmin(password) {
         if(password === ADMIN_PASSWORD) {
             isAdminUnlocked = true;
-            document.getElementById("adminLockedContent").style.display = "block";
-            document.getElementById("adminPassword").style.display = "none";
-            document.getElementById("unlockAdminBtn").style.display = "none";
+            document.getElementById("adminContent").style.display = "block";
+            document.getElementById("adminLockBlock").style.display = "none";
             showToast("✅ Доступ к админ-панели получен!");
+            updateOnlineStatus();
+            setInterval(updateOnlineStatus, 10000);
             return true;
         } else {
             showToast("❌ Неверный пароль!");
@@ -594,38 +844,22 @@
         }
     }
     
-    // Обработчик кнопки админ-панели с запросом пароля
-    document.getElementById("adminToggleBtn").addEventListener("click", () => {
-        const adminPanel = document.getElementById("adminPanel");
-        if (adminPanel.classList.contains("hidden")) {
-            // При открытии запрашиваем пароль, если еще не разблокирован
-            if (!isAdminUnlocked) {
-                const password = prompt("🔐 Введите пароль администратора:");
-                if (password === ADMIN_PASSWORD) {
-                    isAdminUnlocked = true;
-                    adminPanel.classList.remove("hidden");
-                    document.getElementById("adminLockedContent").style.display = "block";
-                    showToast("✅ Добро пожаловать в админ-панель!");
-                } else if (password !== null) {
-                    showToast("❌ Неверный пароль! Доступ запрещен.");
-                    return;
-                } else {
-                    return;
-                }
-            } else {
-                adminPanel.classList.remove("hidden");
+    // Обработка вкладок
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab + "Tab").classList.add("active");
+            if (btn.dataset.tab === "admin" && isAdminUnlocked) {
+                updateOnlineStatus();
             }
-        } else {
-            adminPanel.classList.add("hidden");
-        }
+        });
     });
     
-    // Кнопка разблокировки внутри панели (на случай если через prompt не сработало)
-    document.getElementById("unlockAdminBtn").addEventListener("click", () => {
-        let password = document.getElementById("adminPassword").value;
-        if(unlockAdminPanel(password)) {
-            document.getElementById("adminPassword").value = "";
-        }
+    document.getElementById("unlockAdminBtn2").addEventListener("click", () => {
+        let password = document.getElementById("adminPasswordInput").value;
+        unlockAdmin(password);
     });
     
     document.getElementById("adminSetCoinsBtn").addEventListener("click", () => {
@@ -639,6 +873,7 @@
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
             if(currentUser && currentUser.username===name){ currentUser.coins = target.coins; syncUI(); }
             showToast(`✅ ${name} +${val} монет`);
+            renderUsersTable();
         } else showToast("Пользователь не найден");
     });
     
@@ -653,6 +888,7 @@
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
             if(currentUser && currentUser.username===name){ currentUser.cardsOwned = target.cardsOwned; syncUI(); }
             showToast(`💎 Все карты для ${name}`);
+            renderUsersTable();
         } else showToast("Нет юзера");
     });
     
@@ -688,6 +924,11 @@
         let bet = parseInt(document.getElementById("betAmount").value)||100; 
         document.getElementById("casinoResult").innerText = casinoDice(bet); 
     };
+    
+    // Обновление онлайна при кликах
+    setInterval(() => {
+        if(currentUser) updateOnlineStatus();
+    }, 5000);
     
     initClicker();
     syncUI();
